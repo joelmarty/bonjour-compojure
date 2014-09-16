@@ -23,8 +23,9 @@
   :immutant {:context-path "/bonjour"
              :nrepl-port 9001}
 
-  :profiles
-  {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
-                        [ring-mock "0.1.5"]]}}
+  :jvm-opts ["-Dnomad.env=dev"]
+  :profiles {:dev {:dependencies [[javax.servlet/servlet-api "2.5"]
+                                  [ring-mock "0.1.5"]]
+                   :jvm-opts ["-Dnomad.env=dev"]}}
 
   :repl-options (:nrepl-middleware [lighttable.nrepl.handler/lighttable-ops]))

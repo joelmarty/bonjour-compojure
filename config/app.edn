@@ -1,5 +1,10 @@
 {
- :mongo-host "localhost"
- :mongo-port 27017
- :bonjour "poney"
+   :mongo-host "localhost"
+   :mongo-port 27017
+   :database "bonjour"
+   :nomad/environments
+   {
+    "dev" {:database "testdb" :bonjour "test"}
+    "prod" {:bonjour "poney"}
+   }
 }
