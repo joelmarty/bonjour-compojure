@@ -24,8 +24,7 @@
     (if (not (nil? @conn))
       (reset! bonjourdb (mg/get-db @conn database))
       (throw (RuntimeException.
-             (str "The connection to" host ":" port "/" database "failed to open"))))
-    bonjourdb))
+             (str "The connection to" host ":" port "/" database "failed to open"))))))
 
 (defn list-empty?
   "returns true if the bonjour collection contains any element"

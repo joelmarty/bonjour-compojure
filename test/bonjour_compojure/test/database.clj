@@ -8,8 +8,6 @@
 
 (defconfig app-config (io/resource "app.edn"))
 
-(def bonjourdb (atom nil))
-
 (defn create-db [connection db-name collection-name]
   (let [db (mg/get-db connection db-name)]
     (if (mc/exists? db collection-name)
@@ -29,22 +27,22 @@
         test-collection (:bonjour config)]
     (let [conn (mg/connect {:host host :port port})]
       (create-db conn test-db test-collection))
-    (let [dbatom (dbapi/init)]
-      (reset! bonjourdb @dbatom))
+    (dbapi/init)
     (test-fn) ;; call to test is explicit
     (let [conn (mg/connect {:host host :port port})]
       (delete-db conn test-db))))
 
+(use-fixtures :once setup)
+
 (deftest test-db
-  (use-fixtures :once setup)
 
   (testing "the connection was created succesfully"
-    (is (instance? com.mongodb.DBApiLayer @bonjourdb)))
+    (is (instance? com.mongodb.DBApiLayer @dbapi/bonjourdb)))
 
   (testing "gets a bonjour by date"
     (let [date "2014-09-16"
           test-collection (:bonjour (app-config))]
-      (mc/insert @bonjourdb test-collection {:date date})
+      (mc/insert @dbapi/bonjourdb test-collection {:date date})
       (let [created-bonjour (dbapi/find-by-date date)]
         (is (not (nil? created-bonjour)))
         (is (= (:date created-bonjour) "2014-09-16")))))
