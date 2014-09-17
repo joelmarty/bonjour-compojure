@@ -38,7 +38,7 @@
   [date]
   (let [config (app-config)
         collection (:bonjour config)]
-    (from-db-object (mc/find @bonjourdb collection {:date date}) true)))
+    (from-db-object (mc/find-one @bonjourdb collection {:date date}) true)))
 
 
 ;; (defn collection-exists?
