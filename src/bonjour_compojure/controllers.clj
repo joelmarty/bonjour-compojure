@@ -1,5 +1,6 @@
 (ns bonjour_compojure.controllers
-  (:require [liberator.core :refer [defresource log!]])
+  (:require [liberator.core :refer [defresource log!]]
+            [bonjour_compojure.database :as dbapi])
   (:import java.net.URL))
 
 ;; before we can plug to a real db...
@@ -26,15 +27,17 @@
 (defresource all
   :allowed-methods [:get :post]
   :available-media-types ["application/json"]
-  :handle-ok (fn [_] (vals @bonjours))
   :post! (fn [ctx]
            (dosync (let [bonjour (get-in ctx [:request :params :bonjour])
-                         id (+ 1 (count @bonjours))
-                         new_bonjour (assoc bonjour :id id)]
-                     (alter bonjours assoc id new_bonjour)
+                         created_bonjour (dbapi/add bonjour)
+                         id (:_id created_bonjour)]
                      {::id id})))
+  :handle-ok (fn [ctx]
+               (let [page (get-in ctx [:request :params :page])
+                     count (get-in ctx [:request :params :count])]
+                 (dbapi/list page count)))
   :post-redirect? (fn [ctx] {:location (format "/bonjours/%s" (::id ctx))})
-  :etag (fn [_] (str (count @bonjours)))
+  :etag (fn [_] (str (count (dbapi/list))))
   :malformed? #(contains? % :text)
   )
 
@@ -42,7 +45,7 @@
   :allowed-methods [:get :put :delete]
   :available-media-types ["application/json"]
   :exists? (fn [_]
-             (let [b (get @bonjours (read-string id))]
+             (let [b (dbapi/find-by-id (read-string id))]
                (if-not (nil? b)
                  {::bonjour b})))
   :existed? (fn [_] (nil? (get @bonjours (read-string id) ::sentinel)))

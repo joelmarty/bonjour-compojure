@@ -46,6 +46,12 @@
   (let [collection (:bonjour (app-config))]
     (from-db-object (mc/find-one @bonjourdb collection {:date date}) true)))
 
+(defn find-by-id
+  "finds a bonjour by its id"
+  [id]
+  (let [collection (:bonjour (app-config))]
+    (from-db-object (mc/find-by-id @bonjourdb collection id) true)))
+
 (defn add
   "adds a new bonjour to the db"
   [bonjour]

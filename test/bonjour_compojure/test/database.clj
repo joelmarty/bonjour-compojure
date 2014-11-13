@@ -57,6 +57,15 @@
         (is (not (nil? created-bonjour)))
         (is (= (:date created-bonjour) "2014-09-16")))))
 
+  (testing "gets a bonjour by id"
+    (let [test-collection (:bonjour (app-config))
+          documents (into [] (test-data))]
+      (mc/insert-batch @dbapi/bonjourdb test-collection documents)
+      (let [docs-in-db (dbapi/list)
+            one-doc (first docs-in-db)
+            found-doc (dbapi/find-by-id (:_id one-doc))]
+        (is (= one-doc found-doc)))))
+
   (testing "adds a bonjour"
     (let [new_bjr {:date "2014-09-17" :image "2014/09/17.jpg"}
           created_bjr (dbapi/add new_bjr)]
