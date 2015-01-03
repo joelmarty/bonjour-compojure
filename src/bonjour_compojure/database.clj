@@ -50,7 +50,7 @@
   "finds a bonjour by its id"
   [id]
   (let [collection (:bonjour (app-config))]
-    (from-db-object (mc/find-by-id @bonjourdb collection id) true)))
+    (from-db-object (mc/find-by-id @bonjourdb collection (to-object-id id)) true)))
 
 (defn add
   "adds a new bonjour to the db"
@@ -70,6 +70,15 @@
       (mq/sort {:date -1})
       (mq/paginate :page page :per-page length))))
 
+(defn update
+  "Updates a bonjour previously recorded in database and returns the result"
+  [updated_bonjour]
+  (let [collection (:bonjour (app-config))
+        document_id (to-object-id (:_id updated_bonjour))
+        insertable_document (assoc updated_bonjour :_id document_id)]
+    (mc/save-and-return @bonjourdb collection insertable_document)))
+
+
 (defn delete
   "Deletes a bonjour by id. Returns the deleted element"
   [id]
@@ -77,7 +86,7 @@
         deleted-bonjour (mc/find-one-as-map @bonjourdb collection {:_id (to-object-id id)})]
     (if (not (nil? deleted-bonjour))
      (do
-       (mc/remove-by-id @bonjourdb collection id)
+       (mc/remove-by-id @bonjourdb collection (to-object-id id))
        deleted-bonjour)
      nil)))
 

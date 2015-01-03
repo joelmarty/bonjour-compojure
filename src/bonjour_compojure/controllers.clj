@@ -48,18 +48,17 @@
              (let [b (dbapi/find-by-id (read-string id))]
                (if-not (nil? b)
                  {::bonjour b})))
-  :existed? (fn [_] (nil? (get @bonjours (read-string id) ::sentinel)))
+  :existed? false
   :can-put-to-missing? false
   :handle-ok ::bonjour
   :put! (fn [ctx]
-          (dosync
-           (let [new_bonjour (get-in ctx [:request :params :bonjour])]
-             (alter bonjours assoc (read-string id) new_bonjour))))
+          (let [new_bonjour (get-in ctx [:request :params :bonjour])]
+            (dbapi/update new_bonjour)))
   :malformed? #(and
                 (contains? % :id)
                 (contains? % :text))
   :delete! (fn [_]
-             (dosync
-              (alter bonjours assoc (read-string id) nil)))
-  :new? (fn [_] (nil? (get @bonjours id ::sentinel)))
+             (dbapi/delete (:_id ::bonjour)))
+  :new? false
+  :respond-with-entity? true
 )

@@ -88,13 +88,22 @@
       (let [docs-in-db (dbapi/list 1 5)]
         (is (= 5 (count docs-in-db))))))
 
+  (testing "updates a previously saved bonjour"
+    (let [test_collection (:bonjour (app-config))
+          test_document (first (test-data))
+          inserted_document (mc/insert-and-return @dbapi/bonjourdb test_collection test_document)
+          updated_document (assoc inserted_document :date "foo")
+          update_result (dbapi/update updated_document)]
+      (is (= (:date update_result) (:date updated_document)))
+      (is (= (:_id update_result) (:_id updated_document)))))
+
   (testing "deletes a bonjour by id"
     (let [test-collection (:bonjour (app-config))
           documents (into [] (test-data))
-          last_inserted (last documents)]
+          last_document (last documents)]
       (mc/insert-batch @dbapi/bonjourdb test-collection documents)
-      (let [to_delete (dbapi/list 1 1)
-            deleted (dbapi/delete (:_id (first to_delete)))]
-        (is (= (:date deleted) (:date last_inserted)))
-        (is (= (:image deleted) (:image last_inserted))))))
+      (let [to_delete (first (mc/find-maps @dbapi/bonjourdb test-collection {:date (:date last_document)}))
+            deleted (dbapi/delete (str (:_id to_delete)))]
+        (is (= (:date deleted) (:date last_document)))
+        (is (= (:image deleted) (:image last_document))))))
 )
